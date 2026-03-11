@@ -1,0 +1,336 @@
+:root {
+  color: #e5eef8;
+  background: #081120;
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: dark;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  min-height: 100vh;
+  background: #081120;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.app-shell {
+  min-height: 100vh;
+  padding: 24px 16px 40px;
+}
+
+.setup-screen,
+.workout-screen {
+  width: min(100%, 720px);
+  margin: 0 auto;
+}
+
+.hero-copy {
+  margin-bottom: 20px;
+}
+
+.phase-kicker,
+.section-label,
+.section-help,
+.status-card span,
+.color-picker span,
+.duration-editor span,
+.round-copy {
+  color: rgba(226, 232, 240, 0.78);
+}
+
+.hero-copy h1,
+.workout-screen h1 {
+  margin: 0;
+  font-size: clamp(2.4rem, 6vw, 4.4rem);
+  line-height: 0.95;
+}
+
+.subcopy {
+  margin: 12px 0 0;
+  max-width: 38rem;
+  color: rgba(226, 232, 240, 0.88);
+}
+
+.hero-quote {
+  margin: 14px 0 0;
+  padding: 14px 18px;
+  max-width: 38rem;
+  border-left: 3px solid rgba(226, 232, 240, 0.4);
+  color: rgba(226, 232, 240, 0.88);
+  background: #0f172a;
+  border-radius: 0 8px 8px 0;
+}
+
+.rounds-panel,
+.summary-panel,
+.phase-card,
+.status-card {
+  border: 1px solid #334155;
+  background: #0f172a;
+  border-radius: 10px;
+}
+
+.rounds-panel,
+.summary-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 16px;
+  padding: 18px 20px;
+}
+
+.section-label {
+  margin: 0;
+  font-size: 0.88rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.section-help,
+.phase-name,
+.round-copy {
+  margin: 0;
+}
+
+.round-input {
+  width: 100%;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  background: #020617;
+  color: #f8fafc;
+  padding: 14px 16px;
+  text-align: center;
+  font-size: 1.25rem;
+}
+
+.phase-list {
+  display: grid;
+  gap: 14px;
+  margin: 18px 0;
+}
+
+.phase-card {
+  padding: 18px;
+}
+
+.phase-card-disabled {
+  opacity: 0.58;
+}
+
+.phase-card-top,
+.phase-card-body,
+.phase-actions,
+.control-row,
+.status-grid {
+  display: flex;
+  gap: 12px;
+}
+
+.phase-card-top,
+.phase-card-body {
+  justify-content: space-between;
+  align-items: center;
+}
+
+.phase-card-body {
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.phase-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.mini-button,
+.ghost-button,
+.secondary-button,
+.primary-button,
+.start-button {
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 12px 16px;
+  transition:
+    transform 120ms ease,
+    opacity 120ms ease,
+    background 120ms ease;
+}
+
+.mini-button {
+  background: #1e293b;
+  border-color: #334155;
+  color: #e2e8f0;
+  padding: 10px 12px;
+}
+
+.mini-button:disabled,
+.start-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.mini-button:not(:disabled):active,
+.ghost-button:active,
+.secondary-button:active,
+.primary-button:active,
+.start-button:not(:disabled):active {
+  transform: scale(0.98);
+}
+
+.duration-editor {
+  display: flex;
+  gap: 10px;
+}
+
+.duration-editor label,
+.color-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.duration-editor input {
+  width: 96px;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  background: #020617;
+  color: #f8fafc;
+  padding: 12px 14px;
+}
+
+.color-picker input {
+  width: 64px;
+  height: 48px;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  background: transparent;
+  padding: 0;
+}
+
+.summary-panel {
+  margin-top: 8px;
+}
+
+.start-button {
+  width: 100%;
+  min-height: 56px;
+}
+
+.start-button,
+.primary-button {
+  background: #22c55e;
+  color: #052e16;
+  border-color: #22c55e;
+  font-weight: 800;
+}
+
+.secondary-button {
+  background: #0f172a;
+  border-color: #334155;
+  color: #f8fafc;
+}
+
+.active-workout {
+  display: grid;
+  place-items: center;
+}
+
+.workout-screen {
+  position: relative;
+  z-index: 1;
+  min-height: calc(100vh - 64px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 22px;
+}
+
+.exit-button {
+  align-self: flex-end;
+  background: #0f172a;
+  border-color: #334155;
+  color: #f8fafc;
+}
+
+.timer-value {
+  margin: 0;
+  font-size: clamp(4rem, 18vw, 8rem);
+  line-height: 0.95;
+  font-weight: 900;
+  letter-spacing: -0.05em;
+}
+
+.status-grid {
+  flex-wrap: wrap;
+}
+
+.status-card {
+  flex: 1 1 220px;
+  padding: 16px 18px;
+}
+
+.status-card strong {
+  display: block;
+  margin-top: 6px;
+  font-size: 1.6rem;
+  color: #f8fafc;
+}
+
+.control-row {
+  flex-wrap: wrap;
+}
+
+.primary-button,
+.secondary-button {
+  flex: 1 1 180px;
+  min-height: 56px;
+}
+
+.finish-state {
+  display: grid;
+  gap: 18px;
+}
+
+@media (max-width: 640px) {
+  .app-shell {
+    padding-inline: 12px;
+  }
+
+  .phase-card-top,
+  .phase-card-body {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .phase-actions,
+  .duration-editor {
+    flex-wrap: wrap;
+  }
+}
