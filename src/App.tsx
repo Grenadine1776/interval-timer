@@ -20,9 +20,9 @@ type WorkoutSession = {
   currentIndex: number;
   phaseEndsAt: number;
   remainingMs: number;
+  elapsedMs: number;
+  lastResumedAt: number | null;
   isPaused: boolean;
-  totalPausedMs: number;
-  pauseStartedAt: number | null;
   finished: boolean;
 };
 
@@ -173,13 +173,22 @@ function advanceSession(session: WorkoutSession, now: number): WorkoutSession {
     return session;
   }
 
-  let currentIndex = session.currentIndex;
-  let phaseEndsAt = session.phaseEndsAt;
+  const syncedSession =
+    session.lastResumedAt === null
+      ? session
+      : {
+          ...session,
+          elapsedMs: session.elapsedMs + Math.max(0, now - session.lastResumedAt),
+          lastResumedAt: now
+        };
+
+  let currentIndex = syncedSession.currentIndex;
+  let phaseEndsAt = syncedSession.phaseEndsAt;
 
   while (now >= phaseEndsAt) {
-    if (currentIndex >= session.phases.length - 1) {
+    if (currentIndex >= syncedSession.phases.length - 1) {
       return {
-        ...session,
+        ...syncedSession,
         currentIndex,
         phaseEndsAt,
         remainingMs: 0,
@@ -188,11 +197,11 @@ function advanceSession(session: WorkoutSession, now: number): WorkoutSession {
     }
 
     currentIndex += 1;
-    phaseEndsAt += session.phases[currentIndex].durationSec * 1000;
+    phaseEndsAt += syncedSession.phases[currentIndex].durationSec * 1000;
   }
 
   return {
-    ...session,
+    ...syncedSession,
     currentIndex,
     phaseEndsAt,
     remainingMs: Math.max(0, phaseEndsAt - now)
@@ -200,32 +209,34 @@ function advanceSession(session: WorkoutSession, now: number): WorkoutSession {
 }
 
 function skipPhase(session: WorkoutSession, now: number): WorkoutSession {
-  const currentPauseDelay =
-    session.pauseStartedAt === null ? 0 : Math.max(0, now - session.pauseStartedAt);
-  const totalPausedMs = session.totalPausedMs + currentPauseDelay;
+  const syncedSession =
+    session.lastResumedAt === null
+      ? session
+      : {
+          ...session,
+          elapsedMs: session.elapsedMs + Math.max(0, now - session.lastResumedAt),
+          lastResumedAt: now
+        };
 
-  if (session.currentIndex >= session.phases.length - 1) {
+  if (syncedSession.currentIndex >= syncedSession.phases.length - 1) {
     return {
-      ...session,
+      ...syncedSession,
       remainingMs: 0,
-      totalPausedMs,
-      pauseStartedAt: null,
       isPaused: false,
       finished: true
     };
   }
 
-  const nextIndex = session.currentIndex + 1;
-  const nextPhase = session.phases[nextIndex];
+  const nextIndex = syncedSession.currentIndex + 1;
+  const nextPhase = syncedSession.phases[nextIndex];
 
   return {
-    ...session,
+    ...syncedSession,
     currentIndex: nextIndex,
     phaseEndsAt: now + nextPhase.durationSec * 1000,
     remainingMs: nextPhase.durationSec * 1000,
+    lastResumedAt: now,
     isPaused: false,
-    totalPausedMs,
-    pauseStartedAt: null,
     finished: false
   };
 }
@@ -278,19 +289,10 @@ export default function App() {
   const [rounds, setRounds] = useState<number>(initialSettings.rounds);
   const [roundsInput, setRoundsInput] = useState<string>(() => String(initialSettings.rounds));
   const [session, setSession] = useState<WorkoutSession | null>(null);
-  const [clockNow, setClockNow] = useState(() => Date.now());
 
   useEffect(() => {
     saveSettings({ phases, rounds });
   }, [phases, rounds]);
-
-  useEffect(() => {
-    const intervalId = window.setInterval(() => {
-      setClockNow(Date.now());
-    }, 200);
-
-    return () => window.clearInterval(intervalId);
-  }, []);
 
   useEffect(() => {
     if (!session || session.isPaused || session.finished) {
@@ -313,11 +315,7 @@ export default function App() {
   const activePhaseCount = phases.filter((phase) => phase.enabled && phase.durationSec > 0).length;
   const canStart = activePhaseCount > 0 && rounds > 0;
   const currentPhase = session?.phases[session.currentIndex] ?? null;
-  const currentDelayMs =
-    session === null
-      ? 0
-      : session.totalPausedMs +
-        (session.pauseStartedAt === null ? 0 : Math.max(0, clockNow - session.pauseStartedAt));
+  const elapsedWorkoutMs = session?.elapsedMs ?? 0;
 
   const updatePhase = (phaseIndex: number, nextPhase: PhaseConfig) => {
     setPhases((currentPhases) =>
@@ -403,9 +401,9 @@ export default function App() {
       currentIndex: 0,
       phaseEndsAt: now + firstPhase.durationSec * 1000,
       remainingMs: firstPhase.durationSec * 1000,
+      elapsedMs: 0,
+      lastResumedAt: now,
       isPaused: false,
-      totalPausedMs: 0,
-      pauseStartedAt: null,
       finished: false
     });
   };
@@ -419,24 +417,23 @@ export default function App() {
       const now = Date.now();
 
       if (currentSession.isPaused) {
-        const pausedFor = currentSession.pauseStartedAt
-          ? Math.max(0, now - currentSession.pauseStartedAt)
-          : 0;
-
         return {
           ...currentSession,
           isPaused: false,
           phaseEndsAt: now + currentSession.remainingMs,
-          totalPausedMs: currentSession.totalPausedMs + pausedFor,
-          pauseStartedAt: null
+          lastResumedAt: now
         };
       }
 
       return {
         ...currentSession,
+        elapsedMs:
+          currentSession.lastResumedAt === null
+            ? currentSession.elapsedMs
+            : currentSession.elapsedMs + Math.max(0, now - currentSession.lastResumedAt),
+        lastResumedAt: null,
         isPaused: true,
-        remainingMs: Math.max(0, currentSession.phaseEndsAt - now),
-        pauseStartedAt: now
+        remainingMs: Math.max(0, currentSession.phaseEndsAt - now)
       };
     });
   };
@@ -473,7 +470,7 @@ export default function App() {
               <p className="round-copy">
                 Round {currentPhase.totalRounds} / {currentPhase.totalRounds}
               </p>
-              <p className="round-copy">Total delay {formatMs(currentDelayMs)}</p>
+              <p className="round-copy">Elapsed {formatMs(elapsedWorkoutMs)}</p>
               <div className="control-row">
                 <button className="primary-button" onClick={startWorkout}>
                   Restart
@@ -495,8 +492,8 @@ export default function App() {
                   </strong>
                 </div>
                 <div className="status-card">
-                  <span>Total delay</span>
-                  <strong>{formatMs(currentDelayMs)}</strong>
+                  <span>Elapsed</span>
+                  <strong>{formatMs(elapsedWorkoutMs)}</strong>
                 </div>
               </div>
               <div className="control-row">
