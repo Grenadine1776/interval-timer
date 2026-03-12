@@ -468,9 +468,40 @@ export default function App() {
         <div className="hero-copy">
           <h1>Interval Timer</h1>
           <blockquote className="hero-quote">
-            <em>I'm not paying $3.99 per month for a goddamn timer in the App Store. - Grenadine</em>
+            <em>I'm not paying $3.99 per month for a goddamn timer in the App Store.</em>
+            <cite className="quote-source">Grenadine</cite>
           </blockquote>
         </div>
+
+        <section className="rounds-panel">
+          <div>
+            <p className="section-label">Rounds</p>
+            <p className="section-help">The full stage list repeats this many times.</p>
+          </div>
+          <input
+            className="round-input"
+            type="number"
+            min={1}
+            max={999}
+            value={rounds}
+            onChange={(event) => {
+              const nextRounds = Number(event.target.value || 1);
+              setRounds(Math.max(1, Math.min(999, nextRounds)));
+            }}
+          />
+        </section>
+
+        <section className="summary-panel">
+          <div>
+            <p className="section-label">Ready to start</p>
+            <p className="section-help">
+              {activePhaseCount} active stage{activePhaseCount === 1 ? "" : "s"} per round
+            </p>
+          </div>
+          <button className="start-button" onClick={startWorkout} disabled={!canStart}>
+            Start workout
+          </button>
+        </section>
 
         <section className="phase-list">
           {phases.map((phase, index) => (
@@ -533,36 +564,6 @@ export default function App() {
               </div>
             </article>
           ))}
-        </section>
-
-        <section className="rounds-panel">
-          <div>
-            <p className="section-label">Rounds</p>
-            <p className="section-help">The full stage list repeats this many times.</p>
-          </div>
-          <input
-            className="round-input"
-            type="number"
-            min={1}
-            max={999}
-            value={rounds}
-            onChange={(event) => {
-              const nextRounds = Number(event.target.value || 1);
-              setRounds(Math.max(1, Math.min(999, nextRounds)));
-            }}
-          />
-        </section>
-
-        <section className="summary-panel">
-          <div>
-            <p className="section-label">Ready to start</p>
-            <p className="section-help">
-              {activePhaseCount} active stage{activePhaseCount === 1 ? "" : "s"} per round
-            </p>
-          </div>
-          <button className="start-button" onClick={startWorkout} disabled={!canStart}>
-            Start workout
-          </button>
         </section>
       </section>
     </main>

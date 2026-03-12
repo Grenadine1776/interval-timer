@@ -90,6 +90,23 @@ button {
   border-radius: 0 8px 8px 0;
 }
 
+.hero-quote em {
+  display: block;
+  font-style: italic;
+}
+
+.quote-source {
+  display: block;
+  margin-top: 10px;
+  color: rgba(226, 232, 240, 0.62);
+  font-size: 0.92rem;
+  font-style: normal;
+}
+
+.quote-source::before {
+  content: "- ";
+}
+
 .rounds-panel,
 .summary-panel,
 .phase-card,
