@@ -40,7 +40,11 @@ button {
 
 .app-shell {
   min-height: 100vh;
-  padding: 24px 16px 40px;
+  padding:
+    calc(24px + env(safe-area-inset-top, 0px))
+    16px
+    calc(56px + env(safe-area-inset-bottom, 0px))
+    16px;
 }
 
 .setup-screen,
@@ -236,6 +240,7 @@ button {
 
 .summary-panel {
   margin-top: 8px;
+  margin-bottom: 20px;
 }
 
 .start-button {
@@ -265,11 +270,16 @@ button {
 .workout-screen {
   position: relative;
   z-index: 1;
-  min-height: calc(100vh - 64px);
+  min-height: calc(100vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
   display: flex;
   flex-direction: column;
   justify-content: center;
   gap: 22px;
+  padding:
+    env(safe-area-inset-top, 0px)
+    0
+    calc(24px + env(safe-area-inset-bottom, 0px))
+    0;
 }
 
 .exit-button {
@@ -320,7 +330,11 @@ button {
 
 @media (max-width: 640px) {
   .app-shell {
-    padding-inline: 12px;
+    padding:
+      calc(20px + env(safe-area-inset-top, 0px))
+      12px
+      calc(48px + env(safe-area-inset-bottom, 0px))
+      12px;
   }
 
   .phase-card-top,
