@@ -468,7 +468,7 @@ export default function App() {
         <div className="hero-copy">
           <h1>Interval Timer</h1>
           <blockquote className="hero-quote">
-            <em>I'm not paying $3.99 for a goddamn timer in app store. - Grenadine</em>
+            <em>I'm not paying $3.99 per month for a goddamn timer in app store. - Grenadine</em>
           </blockquote>
         </div>
 
