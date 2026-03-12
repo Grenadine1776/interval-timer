@@ -139,8 +139,14 @@ button {
   margin: 0;
 }
 
+.rounds-input-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .round-input {
-  width: 100%;
+  flex: 1 1 auto;
   border: 1px solid #334155;
   border-radius: 8px;
   background: #020617;
@@ -148,6 +154,23 @@ button {
   padding: 14px 16px;
   text-align: center;
   font-size: 1.25rem;
+}
+
+.round-step-button {
+  width: 52px;
+  min-width: 52px;
+  min-height: 52px;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  background: #1e293b;
+  color: #f8fafc;
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.round-step-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .phase-list {

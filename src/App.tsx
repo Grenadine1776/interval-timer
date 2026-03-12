@@ -73,6 +73,10 @@ function clampSeconds(value: number) {
   return Math.max(0, Math.min(35999, value));
 }
 
+function clampRounds(value: number) {
+  return Math.max(1, Math.min(999, Math.floor(value)));
+}
+
 function formatClock(totalSeconds: number) {
   const safe = Math.max(0, totalSeconds);
   const minutes = Math.floor(safe / 60);
@@ -132,7 +136,7 @@ function loadSettings(): StoredSettings {
 
     return {
       phases,
-      rounds: Math.max(1, Math.min(999, Math.floor(parsed.rounds)))
+      rounds: clampRounds(parsed.rounds)
     };
   } catch {
     return DEFAULT_SETTINGS;
@@ -272,6 +276,7 @@ export default function App() {
   const initialSettings = useMemo(() => loadSettings(), []);
   const [phases, setPhases] = useState<PhaseConfig[]>(initialSettings.phases);
   const [rounds, setRounds] = useState<number>(initialSettings.rounds);
+  const [roundsInput, setRoundsInput] = useState<string>(() => String(initialSettings.rounds));
   const [session, setSession] = useState<WorkoutSession | null>(null);
   const [clockNow, setClockNow] = useState(() => Date.now());
 
@@ -335,6 +340,53 @@ export default function App() {
 
       return nextPhases;
     });
+  };
+
+  const handleRoundsChange = (nextValue: string) => {
+    setRoundsInput(nextValue);
+
+    if (nextValue === "") {
+      return;
+    }
+
+    const parsedValue = Number(nextValue);
+    if (!Number.isFinite(parsedValue)) {
+      return;
+    }
+
+    const normalizedRounds = clampRounds(parsedValue);
+    setRounds(normalizedRounds);
+
+    if (String(normalizedRounds) !== nextValue) {
+      setRoundsInput(String(normalizedRounds));
+    }
+  };
+
+  const commitRoundsInput = () => {
+    if (roundsInput.trim() === "") {
+      setRoundsInput(String(rounds));
+      return;
+    }
+
+    const parsedValue = Number(roundsInput);
+    if (!Number.isFinite(parsedValue)) {
+      setRoundsInput(String(rounds));
+      return;
+    }
+
+    const normalizedRounds = clampRounds(parsedValue);
+    setRounds(normalizedRounds);
+    setRoundsInput(String(normalizedRounds));
+  };
+
+  const stepRounds = (delta: -1 | 1) => {
+    const baseRounds =
+      roundsInput.trim() === "" || !Number.isFinite(Number(roundsInput))
+        ? rounds
+        : clampRounds(Number(roundsInput));
+    const nextRounds = clampRounds(baseRounds + delta);
+    setRounds(nextRounds);
+    setRoundsInput(String(nextRounds));
   };
 
   const startWorkout = () => {
@@ -468,7 +520,7 @@ export default function App() {
         <div className="hero-copy">
           <h1>Interval Timer</h1>
           <blockquote className="hero-quote">
-            <em>I'm not paying $3.99 per month for a goddamn timer in the App Store.</em>
+            <em>I'm not paying $3.99 a month in the App Store for a goddamn timer.</em>
             <cite className="quote-source">Grenadine</cite>
           </blockquote>
         </div>
@@ -478,17 +530,33 @@ export default function App() {
             <p className="section-label">Rounds</p>
             <p className="section-help">The full stage list repeats this many times.</p>
           </div>
-          <input
-            className="round-input"
-            type="number"
-            min={1}
-            max={999}
-            value={rounds}
-            onChange={(event) => {
-              const nextRounds = Number(event.target.value || 1);
-              setRounds(Math.max(1, Math.min(999, nextRounds)));
-            }}
-          />
+          <div className="rounds-input-row">
+            <button
+              className="round-step-button"
+              onClick={() => stepRounds(-1)}
+              disabled={rounds <= 1}
+              aria-label="Decrease rounds"
+            >
+              -
+            </button>
+            <input
+              className="round-input"
+              type="number"
+              min={1}
+              max={999}
+              value={roundsInput}
+              onChange={(event) => handleRoundsChange(event.target.value)}
+              onBlur={commitRoundsInput}
+            />
+            <button
+              className="round-step-button"
+              onClick={() => stepRounds(1)}
+              disabled={rounds >= 999}
+              aria-label="Increase rounds"
+            >
+              +
+            </button>
+          </div>
         </section>
 
         <section className="summary-panel">
